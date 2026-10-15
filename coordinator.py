@@ -20,6 +20,7 @@ class HondaLinkDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         self.entry = entry
         self.api = api
         self.vin = entry.data[CONF_VIN]
+        self.last_refresh_response: dict[str, Any] | None = None
         interval = max(1, min(1440, int(entry.options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL))))
         super().__init__(
             hass,
@@ -42,7 +43,8 @@ class HondaLinkDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
 
     async def async_force_refresh(self) -> None:
         try:
-            await self.api.async_request_dashboard_update(self.vin)
+            result = await self.api.async_request_dashboard_update(self.vin)
+            self.last_refresh_response = result.response
         except HondaLinkCommandError as err:
             _LOGGER.warning("HondaLink live dashboard refresh request failed: %s", err)
         except HondaLinkError as err:
