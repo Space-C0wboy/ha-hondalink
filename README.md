@@ -17,11 +17,13 @@ This integration uses the HondaLink Android app API flow, observed while debuggi
 
 ## Features
 
-- Fuel level, range, odometer, oil life, 12V battery status, tire pressure, vehicle speed, and last update sensors
-- Door, hood, trunk, window, lights, warning lamp, and remote engine binary sensors
+- Fuel level, range, odometer, oil life, Maintenance Minder items, cabin temperature, 12V battery status, tire pressure, vehicle speed, and last update sensors
+- Door, hood, trunk, window (each door and window individually, plus any-open), lights, warning lamp, and remote engine binary sensors
 - Lock and unlock entity for supported vehicles
 - Buttons for engine start, engine stop, horn, lights, stop horn/lights, and refresh
-- Device tracker from vehicle GPS data when returned by the HondaLink API
+- Device tracker from vehicle GPS data when returned by the HondaLink API, with Honda's photo of the vehicle
+- Re-authentication prompt when the HondaLink password changes
+- Redacted diagnostics download (credentials, tokens, VIN, email, and GPS coordinates removed)
 - Configurable lock and unlock command codes for vehicles or markets that use alternate CIG command names
 
 ## Status
@@ -141,6 +143,13 @@ Enter the VIN manually in the setup form. The integration will still try to fetc
 - EV fields are exposed only when the Honda dashboard payload returns actual values.
 - Lock and unlock command behavior may vary by vehicle, subscription, market, or Honda API changes.
 - HondaLink is a private cloud API; reliability depends on Honda's service and endpoint compatibility.
+
+## Credits
+
+- [David De La Hoz](https://github.com/daviddelahoz): original integration ([daviddelahoz/ha-hondalink](https://github.com/daviddelahoz/ha-hondalink)).
+- [Brian Crook (@bcrook)](https://github.com/bcrook): fix for 401 errors after the HondaLink 5.5.0 gateway update ([PR #5](https://github.com/daviddelahoz/ha-hondalink/pull/5)). His fork ([bcrook/ha-hondalink](https://github.com/bcrook/ha-hondalink)) also first explored diagnostics, cabin temperature, and the TrackerEntity import fix.
+- [@berkman](https://github.com/berkman): options-flow crash fix and applying options without a restart ([PR #3](https://github.com/daviddelahoz/ha-hondalink/pull/3)), adapted by Costya-Y.
+- [Constantine Yevdiukhin (@Costya-Y)](https://github.com/Costya-Y): security and reliability hardening, re-authentication flow, remote-command result handling, door lock-state logic, and the offline regression tests ([Costya-Y/ha-hondalink](https://github.com/Costya-Y/ha-hondalink)).
 
 ## Local Development
 
