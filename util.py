@@ -304,14 +304,15 @@ def all_door_locks_locked(body: dict[str, Any]) -> bool | None:
     doors = get_path(body, "doorStatus", {})
     if not isinstance(doors, dict):
         return None
-    states: list[str] = []
-    for key in ("firstRowDriver", "firstRowPassenger", "secondRowDriver", "secondRowPassenger"):
-        state = get_path(doors, f"{key}.lockState")
-        if state:
-            states.append(str(state))
-    if not states:
-        return None
-    return all(state.lower() == "lock" for state in states)
+    states = [
+        str(get_path(doors, f"{key}.lockState") or "").lower()
+        for key in ("firstRowDriver", "firstRowPassenger", "secondRowDriver", "secondRowPassenger")
+    ]
+    if "unlock" in states:
+        return False
+    if all(state == "lock" for state in states):
+        return True
+    return None
 
 
 def any_open_state(body: dict[str, Any], base: str, keys: list[str], state_key: str = "openState") -> bool | None:

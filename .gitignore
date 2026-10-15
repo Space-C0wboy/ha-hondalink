@@ -5,3 +5,6 @@ __pycache__/
 .idea/
 hondalink_ha_development_summary*.md
 hondalink_ha_development_summary*.MD
+
+.venv/
+.pytest_cache/

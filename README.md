@@ -109,7 +109,7 @@ The default lock command is `alk`; the default unlock command is `dulk`.
 
 ### Could not connect to HondaLink
 
-Restart Home Assistant after updating the custom component, then try setup again. The config flow logs the HondaLink response in a redacted form, so check Home Assistant logs for:
+Restart Home Assistant after updating the custom component, then try setup again. The config flow logs a generic error and, where relevant, an allowlisted error code, so check Home Assistant logs for:
 
 ```text
 HondaLink connection failed during config flow

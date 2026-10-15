@@ -18,16 +18,26 @@
         "data": {
           "vin": "Vehicle"
         }
+      },
+      "reauth_confirm": {
+        "title": "Reconnect HondaLink",
+        "description": "Enter the password for the configured HondaLink account.",
+        "data": {
+          "password": "Password"
+        }
       }
     },
     "error": {
       "cannot_connect": "Could not connect to HondaLink.",
       "invalid_auth": "Invalid HondaLink credentials or remote PIN.",
       "unknown": "Unexpected error.",
-      "vin_required": "No vehicle was discovered. Enter the VIN manually."
+      "vin_required": "No vehicle was discovered. Enter the VIN manually.",
+      "vehicle_not_found": "The configured vehicle was not found in this account."
     },
     "abort": {
-      "already_configured": "This vehicle is already configured."
+      "already_configured": "This vehicle is already configured.",
+      "reauth_successful": "Account reconnected.",
+      "unknown": "The configuration entry could not be found."
     }
   },
   "options": {
@@ -45,41 +55,95 @@
   },
   "entity": {
     "sensor": {
-      "fuel_level": {"name": "Fuel level"},
-      "range": {"name": "Range"},
-      "odometer": {"name": "Odometer"},
-      "oil_life": {"name": "Oil life"},
-      "12v_battery_status": {"name": "12V battery status"},
-      "front_left_tire_pressure": {"name": "Front left tire pressure"},
-      "front_right_tire_pressure": {"name": "Front right tire pressure"},
-      "rear_left_tire_pressure": {"name": "Rear left tire pressure"},
-      "rear_right_tire_pressure": {"name": "Rear right tire pressure"},
-      "vehicle_speed": {"name": "Vehicle speed"},
-      "remote_engine_status": {"name": "Remote engine status"},
-      "last_update": {"name": "Last update"}
+      "fuel_level": {
+        "name": "Fuel level"
+      },
+      "range": {
+        "name": "Range"
+      },
+      "odometer": {
+        "name": "Odometer"
+      },
+      "oil_life": {
+        "name": "Oil life"
+      },
+      "12v_battery_status": {
+        "name": "12V battery status"
+      },
+      "front_left_tire_pressure": {
+        "name": "Front left tire pressure"
+      },
+      "front_right_tire_pressure": {
+        "name": "Front right tire pressure"
+      },
+      "rear_left_tire_pressure": {
+        "name": "Rear left tire pressure"
+      },
+      "rear_right_tire_pressure": {
+        "name": "Rear right tire pressure"
+      },
+      "vehicle_speed": {
+        "name": "Vehicle speed"
+      },
+      "remote_engine_status": {
+        "name": "Remote engine status"
+      },
+      "last_update": {
+        "name": "Last update"
+      }
     },
     "binary_sensor": {
-      "any_door_open": {"name": "Any door open"},
-      "hood_open": {"name": "Hood open"},
-      "trunk_open": {"name": "Trunk open"},
-      "any_window_open": {"name": "Any window open"},
-      "any_light_on": {"name": "Any light on"},
-      "warning_lamp_on": {"name": "Warning lamp on"},
-      "remote_engine_running": {"name": "Remote engine running"}
+      "any_door_open": {
+        "name": "Any door open"
+      },
+      "hood_open": {
+        "name": "Hood open"
+      },
+      "trunk_open": {
+        "name": "Trunk open"
+      },
+      "any_window_open": {
+        "name": "Any window open"
+      },
+      "any_light_on": {
+        "name": "Any light on"
+      },
+      "warning_lamp_on": {
+        "name": "Warning lamp on"
+      },
+      "remote_engine_running": {
+        "name": "Remote engine running"
+      }
     },
     "button": {
-      "start_engine": {"name": "Start engine"},
-      "stop_engine": {"name": "Stop engine"},
-      "horn": {"name": "Horn"},
-      "lights": {"name": "Lights"},
-      "stop_horn_lights": {"name": "Stop horn/lights"},
-      "refresh": {"name": "Refresh"}
+      "start_engine": {
+        "name": "Start engine"
+      },
+      "stop_engine": {
+        "name": "Stop engine"
+      },
+      "horn": {
+        "name": "Horn"
+      },
+      "lights": {
+        "name": "Lights"
+      },
+      "stop_horn_lights": {
+        "name": "Stop horn/lights"
+      },
+      "refresh": {
+        "name": "Refresh"
+      }
     },
     "lock": {
-      "doors": {"name": "Doors"}
+      "doors": {
+        "name": "Doors"
+      }
     },
     "device_tracker": {
-      "location": {"name": "Location"}
+      "location": {
+        "name": "Location"
+      }
     }
   }
 }

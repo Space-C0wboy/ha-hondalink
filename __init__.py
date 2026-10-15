@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import uuid
+from datetime import timedelta
 
 import aiohttp
 
@@ -9,7 +10,9 @@ from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_create_clientsession
 
-from .api import HondaLinkAPI
+from homeassistant.exceptions import ConfigEntryAuthFailed, ConfigEntryNotReady
+
+from .api import HondaLinkAPI, HondaLinkAuthError, HondaLinkError
 from .const import (
     CONF_ACCESS_TOKEN,
     CONF_CLIENT_REG_KEY,
@@ -23,12 +26,14 @@ from .const import (
     CONF_PASSWORD,
     CONF_PIN,
     CONF_REFRESH_TOKEN,
+    CONF_SCAN_INTERVAL,
     CONF_SESSION_ID,
     CONF_UNLOCK_COMMAND,
     CONF_VIN,
     DATA_API,
     DATA_COORDINATOR,
     DEFAULT_LOCK_COMMAND,
+    DEFAULT_SCAN_INTERVAL,
     DEFAULT_UNLOCK_COMMAND,
     DOMAIN,
 )
@@ -76,26 +81,60 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         lock_command=entry.options.get(CONF_LOCK_COMMAND, DEFAULT_LOCK_COMMAND),
         unlock_command=entry.options.get(CONF_UNLOCK_COMMAND, DEFAULT_UNLOCK_COMMAND),
     )
-    await api.async_ensure_login()
+    try:
+        await api.async_ensure_login()
+    except HondaLinkAuthError as err:
+        await session.close()
+        raise ConfigEntryAuthFailed(str(err)) from err
+    except HondaLinkError as err:
+        await session.close()
+        raise ConfigEntryNotReady(str(err)) from err
 
     auth_data = api.export_auth_data()
     if any(data.get(key) != value for key, value in auth_data.items()):
         hass.config_entries.async_update_entry(entry, data={**data, **auth_data})
 
     coordinator = HondaLinkDataUpdateCoordinator(hass, entry, api)
-    await coordinator.async_config_entry_first_refresh()
+    try:
+        await coordinator.async_config_entry_first_refresh()
+    except BaseException:
+        await session.close()
+        raise
 
     hass.data[DOMAIN][entry.entry_id] = {
         DATA_API: api,
         DATA_COORDINATOR: coordinator,
     }
 
+    entry.async_on_unload(entry.add_update_listener(_async_entry_updated))
+
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     return True
+
+
+async def _async_entry_updated(hass: HomeAssistant, entry: ConfigEntry) -> None:
+    """Apply options changes to the running api/coordinator.
+
+    Applied in place (rather than reloading the entry) because setup itself
+    updates entry.data with refreshed tokens, which would retrigger a
+    reload-on-update listener.
+    """
+    bucket = hass.data.get(DOMAIN, {}).get(entry.entry_id)
+    if not bucket:
+        return
+    api = bucket[DATA_API]
+    api.pin = entry.options.get(CONF_PIN, entry.data.get(CONF_PIN)) or ""
+    api.lock_command = entry.options.get(CONF_LOCK_COMMAND, DEFAULT_LOCK_COMMAND)
+    api.unlock_command = entry.options.get(CONF_UNLOCK_COMMAND, DEFAULT_UNLOCK_COMMAND)
+    bucket[DATA_COORDINATOR].update_interval = timedelta(
+        minutes=max(1, min(1440, int(entry.options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL))))
+    )
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
     if unload_ok:
-        hass.data[DOMAIN].pop(entry.entry_id, None)
+        bucket = hass.data[DOMAIN].pop(entry.entry_id, None)
+        if bucket:
+            await bucket[DATA_API].session.close()
     return unload_ok
