@@ -5,7 +5,7 @@ from typing import Any, Callable
 
 from homeassistant.components.sensor import SensorDeviceClass, SensorEntity, SensorEntityDescription, SensorStateClass
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import PERCENTAGE, UnitOfLength, UnitOfPressure, UnitOfSpeed
+from homeassistant.const import PERCENTAGE, UnitOfLength, UnitOfPressure, UnitOfSpeed, UnitOfTemperature
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
@@ -114,6 +114,14 @@ SENSORS: tuple[HondaLinkSensorDescription, ...] = (
         device_class=SensorDeviceClass.PRESSURE,
         state_class=SensorStateClass.MEASUREMENT,
         value_fn=_tire("rearRight"),
+    ),
+    HondaLinkSensorDescription(
+        key="cabin_temperature",
+        translation_key="cabin_temperature",
+        native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+        device_class=SensorDeviceClass.TEMPERATURE,
+        state_class=SensorStateClass.MEASUREMENT,
+        value_fn=lambda body: to_float(get_path(body, "temperature.cabin.value")),
     ),
     HondaLinkSensorDescription(
         key="vehicle_speed",

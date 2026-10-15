@@ -93,6 +93,9 @@
       },
       "maintenance_items": {
         "name": "Maintenance items"
+      },
+      "cabin_temperature": {
+        "name": "Cabin temperature"
       }
     },
     "binary_sensor": {

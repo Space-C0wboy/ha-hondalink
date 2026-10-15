@@ -315,6 +315,14 @@ def all_door_locks_locked(body: dict[str, Any]) -> bool | None:
     return None
 
 
+def engine_running(body: dict[str, Any]) -> bool | None:
+    """Honda reports "OFF", "ON", or "IG RUN" (ignition running); anything but OFF means running."""
+    status = str(get_path(body, "remoteEngineStart.vehicleStartEvent.resStatus") or "").strip().upper()
+    if status in ("", "UNKNOWN"):
+        return None
+    return status != "OFF"
+
+
 def maintenance_messages(body: dict[str, Any]) -> list[Any] | None:
     """Maintenance Minder messages; the live refresh nests them differently than the cached poll."""
     minder = get_path(body, "maintenanceMinder")

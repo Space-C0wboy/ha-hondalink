@@ -263,5 +263,18 @@ class OpenStateTests(unittest.TestCase):
     def test_missing_is_unknown(self):
         self.assertIsNone(util.any_open_state(self.body, 'windowStatus', ['rearWindowRR'], 'closeState'))
 
+class EngineRunningTests(unittest.TestCase):
+    def body(self, status):
+        return {'remoteEngineStart': {'vehicleStartEvent': {'resStatus': status}}}
+    def test_ig_run_is_running(self):
+        self.assertTrue(util.engine_running(self.body('IG RUN')))
+    def test_on_is_running(self):
+        self.assertTrue(util.engine_running(self.body('ON')))
+    def test_off_is_not_running(self):
+        self.assertFalse(util.engine_running(self.body('OFF')))
+    def test_unknown_is_unknown(self):
+        self.assertIsNone(util.engine_running(self.body('unknown')))
+        self.assertIsNone(util.engine_running({}))
+
 if __name__=='__main__':
     unittest.main()
