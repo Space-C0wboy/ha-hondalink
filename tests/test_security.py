@@ -239,5 +239,29 @@ class LockTests(unittest.TestCase):
     def test_missing_is_unknown(self):
         self.assertIsNone(util.all_door_locks_locked({}))
 
+class MaintenanceTests(unittest.TestCase):
+    def test_cached_poll_shape_without_messages(self):
+        body = {'maintenanceMinder': {'data': [{'languageCode': 'en'}]}}
+        self.assertEqual(util.maintenance_messages(body), [])
+    def test_live_refresh_shape(self):
+        body = {'maintenanceMinder': {'languageCode': 'en', 'messages': [{'code': 'A1'}]}}
+        self.assertEqual(util.maintenance_messages(body), [{'code': 'A1'}])
+    def test_nested_messages(self):
+        body = {'maintenanceMinder': {'data': [{'messages': [{'code': 'B'}]}]}}
+        self.assertEqual(util.maintenance_messages(body), [{'code': 'B'}])
+    def test_missing_is_unknown(self):
+        self.assertIsNone(util.maintenance_messages({}))
+
+class OpenStateTests(unittest.TestCase):
+    body = {'doorStatus': {'firstRowDriver': {'openState': 'Open'}, 'firstRowPassenger': {'openState': 'Closed'}},
+            'windowStatus': {'rearWindowRL': {'closeState': 'Closed'}}}
+    def test_single_door(self):
+        self.assertTrue(util.any_open_state(self.body, 'doorStatus', ['firstRowDriver']))
+        self.assertFalse(util.any_open_state(self.body, 'doorStatus', ['firstRowPassenger']))
+    def test_single_window(self):
+        self.assertFalse(util.any_open_state(self.body, 'windowStatus', ['rearWindowRL'], 'closeState'))
+    def test_missing_is_unknown(self):
+        self.assertIsNone(util.any_open_state(self.body, 'windowStatus', ['rearWindowRR'], 'closeState'))
+
 if __name__=='__main__':
     unittest.main()

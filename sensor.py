@@ -16,6 +16,7 @@ from .util import (
     find_12v_battery_status,
     get_path,
     leaf_paths,
+    maintenance_messages,
     parse_iso_datetime,
     status_body,
     to_float,
@@ -64,6 +65,13 @@ SENSORS: tuple[HondaLinkSensorDescription, ...] = (
         native_unit_of_measurement=PERCENTAGE,
         state_class=SensorStateClass.MEASUREMENT,
         value_fn=lambda body: to_int(get_path(body, "oilLife.value")),
+    ),
+    HondaLinkSensorDescription(
+        key="maintenance_items",
+        translation_key="maintenance_items",
+        icon="mdi:wrench-clock",
+        value_fn=lambda body: None if (messages := maintenance_messages(body)) is None else len(messages),
+        attr_fn=lambda body: {"messages": maintenance_messages(body) or []},
     ),
     HondaLinkSensorDescription(
         key="12v_battery_status",
