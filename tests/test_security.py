@@ -262,6 +262,11 @@ class OpenStateTests(unittest.TestCase):
         self.assertFalse(util.any_open_state(self.body, 'windowStatus', ['rearWindowRL'], 'closeState'))
     def test_missing_is_unknown(self):
         self.assertIsNone(util.any_open_state(self.body, 'windowStatus', ['rearWindowRR'], 'closeState'))
+    def test_unknown_is_unknown_not_open(self):
+        body = {'doorStatus': {'hood': {'openState': 'unknown'}, 'trunk': {'openState': 'Closed'}}}
+        self.assertIsNone(util.any_open_state(body, 'doorStatus', ['hood']))
+        self.assertFalse(util.any_open_state(body, 'doorStatus', ['hood', 'trunk']))
+        self.assertIsNone(util.any_light_on({'lightStatus': {'head': {'lightState': 'unknown'}}}))
 
 class EngineRunningTests(unittest.TestCase):
     def body(self, status):
