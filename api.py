@@ -6,7 +6,7 @@ import re
 import time
 import uuid
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 import aiohttp
@@ -31,9 +31,9 @@ from .const import (
     DEFAULT_LOCK_COMMAND,
     DEFAULT_UNLOCK_COMMAND,
     DEVICE_DESCRIPTION,
+    HONDA_HEADER_VERSION,
     HONDALINK_BUSINESS_ID,
     HONDALINK_SYSTEM_ID,
-    HONDA_HEADER_VERSION,
     IDENTITY_BASE,
     LEGACY_LOCK_COMMAND,
     LEGACY_UNLOCK_COMMAND,
@@ -69,7 +69,7 @@ class HondaLinkCommandResult:
 
 
 def utc_timestamp() -> str:
-    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
+    return datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%S")
 
 
 def _lower_status(value: Any) -> str:
@@ -177,7 +177,9 @@ class HondaLinkAPI:
         try:
             self.client_reg_key = data["clientregistrationkey"]["client_reg_key"]
         except (KeyError, TypeError) as err:
-            raise HondaLinkAuthError(f"Client registration failed: {_redact_payload(data)}") from err
+            raise HondaLinkAuthError(
+                f"Client registration failed: {_redact_payload(data)}"
+            ) from err
         return self.client_reg_key
 
     async def async_login(self) -> None:
@@ -263,7 +265,9 @@ class HondaLinkAPI:
             raise HondaLinkError(f"Dashboard request failed: {_redact_payload(data)}")
         return data
 
-    async def async_request_dashboard_update(self, vin: str | None = None) -> HondaLinkCommandResult:
+    async def async_request_dashboard_update(
+        self, vin: str | None = None
+    ) -> HondaLinkCommandResult:
         vin = vin or self.vin
         if not vin:
             raise HondaLinkError("VIN is required")
@@ -387,7 +391,9 @@ class HondaLinkAPI:
             raise HondaLinkCommandError(str(err)) from err
         response_body = data.get("responseBody")
         if not isinstance(response_body, dict):
-            raise HondaLinkCommandError(f"Command submission returned no result details: {_redact_payload(data)}")
+            raise HondaLinkCommandError(
+                f"Command submission returned no result details: {_redact_payload(data)}"
+            )
         request_id = response_body.get("cigServiceRequestId")
         status = _command_status(data)
 
@@ -429,7 +435,9 @@ class HondaLinkAPI:
 
             await asyncio.sleep(poll_interval)
 
-        raise HondaLinkCommandError(f"Command timed out waiting for completion: {_redact_payload(last_data)}")
+        raise HondaLinkCommandError(
+            f"Command timed out waiting for completion: {_redact_payload(last_data)}"
+        )
 
     async def _request_identity(
         self,
@@ -459,7 +467,9 @@ class HondaLinkAPI:
         for attempt in range(2 if retry else 1):
             token_used = self.access_token
             try:
-                result = await self._send(method, url, headers=self._api_headers(), json_body=json_body)
+                result = await self._send(
+                    method, url, headers=self._api_headers(), json_body=json_body
+                )
                 header = result.get("Header")
                 if isinstance(header, dict) and str(header.get("ErrorCode")) == "401":
                     raise HondaLinkAuthError("HondaLink authorization failed", status=401)
@@ -494,18 +504,24 @@ class HondaLinkAPI:
                 allow_redirects=False,
             ) as response:
                 if response.status in (401, 403):
-                    raise HondaLinkAuthError("HondaLink authorization failed", status=response.status)
+                    raise HondaLinkAuthError(
+                        "HondaLink authorization failed", status=response.status
+                    )
                 if 300 <= response.status < 400:
                     raise HondaLinkError("HondaLink redirect refused")
                 text = await response.text()
                 try:
                     payload = json.loads(text) if text else {}
                 except json.JSONDecodeError:
-                    raise HondaLinkError(f"Invalid JSON from HondaLink: HTTP {response.status}") from None
+                    raise HondaLinkError(
+                        f"Invalid JSON from HondaLink: HTTP {response.status}"
+                    ) from None
                 if not isinstance(payload, dict):
                     raise HondaLinkError("Unexpected HondaLink response structure")
                 if response.status >= 400:
-                    raise HondaLinkError(f"HondaLink request failed: HTTP {response.status} {_redact_payload(payload)}")
+                    raise HondaLinkError(
+                        f"HondaLink request failed: HTTP {response.status} {_redact_payload(payload)}"
+                    )
                 return payload
         except (aiohttp.ClientError, TimeoutError):
             raise HondaLinkError("HondaLink connection failed or timed out") from None

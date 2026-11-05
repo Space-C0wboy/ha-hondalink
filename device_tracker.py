@@ -11,7 +11,9 @@ from .entity import HondaLinkEntity
 from .util import dms_to_decimal, get_path, status_body, to_float
 
 
-async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback) -> None:
+async def async_setup_entry(
+    hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
+) -> None:
     coordinator = hass.data[DOMAIN][entry.entry_id][DATA_COORDINATOR]
     async_add_entities([HondaLinkDeviceTracker(coordinator, entry)])
 

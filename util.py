@@ -210,11 +210,15 @@ def _collect_12v_battery_candidates(value: Any, path: str, candidates: dict[str,
                 isinstance(item, str) and _text_mentions_12v_battery(item)
             ):
                 candidate = value_from_status_node(item)
-                candidates[item_path] = _attribute_safe_value(candidate if candidate is not None else item)
+                candidates[item_path] = _attribute_safe_value(
+                    candidate if candidate is not None else item
+                )
             _collect_12v_battery_candidates(item, item_path, candidates)
     elif isinstance(value, list):
         for index, item in enumerate(value[:20]):
-            _collect_12v_battery_candidates(item, f"{path}.{index}" if path else str(index), candidates)
+            _collect_12v_battery_candidates(
+                item, f"{path}.{index}" if path else str(index), candidates
+            )
 
 
 def _collect_leaf_paths(value: Any, path: str, paths: list[str], limit: int) -> None:
@@ -240,7 +244,12 @@ def _collect_leaf_paths(value: Any, path: str, paths: list[str], limit: int) -> 
 
 def _looks_like_12v_battery_key(key: str) -> bool:
     key_lower = key.lower()
-    has_12v = "12v" in key_lower or "12_v" in key_lower or "twelvevolt" in key_lower or "twelve_volt" in key_lower
+    has_12v = (
+        "12v" in key_lower
+        or "12_v" in key_lower
+        or "twelvevolt" in key_lower
+        or "twelve_volt" in key_lower
+    )
     has_battery = "battery" in key_lower or "batt" in key_lower
     has_voltage = "volt" in key_lower
     has_status = "status" in key_lower or "state" in key_lower or "condition" in key_lower
@@ -317,7 +326,9 @@ def all_door_locks_locked(body: dict[str, Any]) -> bool | None:
 
 def engine_running(body: dict[str, Any]) -> bool | None:
     """Honda reports "OFF", "ON", or "IG RUN" (ignition running); anything but OFF means running."""
-    status = str(get_path(body, "remoteEngineStart.vehicleStartEvent.resStatus") or "").strip().upper()
+    status = (
+        str(get_path(body, "remoteEngineStart.vehicleStartEvent.resStatus") or "").strip().upper()
+    )
     if status in ("", "UNKNOWN"):
         return None
     return status != "OFF"
@@ -332,7 +343,9 @@ def maintenance_messages(body: dict[str, Any]) -> list[Any] | None:
     return [message for group in groups for message in group.get("messages") or []]
 
 
-def any_open_state(body: dict[str, Any], base: str, keys: list[str], state_key: str = "openState") -> bool | None:
+def any_open_state(
+    body: dict[str, Any], base: str, keys: list[str], state_key: str = "openState"
+) -> bool | None:
     found = False
     for key in keys:
         value = get_path(body, f"{base}.{key}.{state_key}")
@@ -350,7 +363,10 @@ def any_light_on(body: dict[str, Any]) -> bool | None:
         return None
     found = False
     for item in lights.values():
-        if isinstance(item, dict) and str(item.get("lightState") or "").strip().upper() not in ("", "UNKNOWN"):
+        if isinstance(item, dict) and str(item.get("lightState") or "").strip().upper() not in (
+            "",
+            "UNKNOWN",
+        ):
             found = True
             if str(item.get("lightState")).upper() != "OFF":
                 return True

@@ -9,3 +9,12 @@ updates:
     groups:
       minor-and-patch:
         update-types: ["minor", "patch"]
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "thursday"
+    open-pull-requests-limit: 5
+    groups:
+      minor-and-patch:
+        update-types: ["minor", "patch"]
