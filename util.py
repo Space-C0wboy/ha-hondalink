@@ -26,7 +26,7 @@ def to_int(value: Any) -> int | None:
         if value in (None, "", "unknown"):
             return None
         return int(float(value))
-    except TypeError, ValueError:
+    except (TypeError, ValueError):
         return None
 
 
@@ -35,7 +35,7 @@ def to_float(value: Any) -> float | None:
         if value in (None, "", "unknown"):
             return None
         return float(value)
-    except TypeError, ValueError:
+    except (TypeError, ValueError):
         return None
 
 
@@ -305,7 +305,7 @@ def dms_to_decimal(value: Any) -> float | None:
         minutes = float(parts[1])
         seconds = float(parts[2])
         return sign * (abs(degrees) + minutes / 60 + seconds / 3600)
-    except TypeError, ValueError:
+    except (TypeError, ValueError):
         return None
 
 

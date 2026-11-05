@@ -523,7 +523,7 @@ class HondaLinkAPI:
                         f"HondaLink request failed: HTTP {response.status} {_redact_payload(payload)}"
                     )
                 return payload
-        except aiohttp.ClientError, TimeoutError:
+        except (aiohttp.ClientError, TimeoutError):
             raise HondaLinkError("HondaLink connection failed or timed out") from None
 
     def _api_headers(self) -> dict[str, str]:
