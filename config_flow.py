@@ -5,11 +5,10 @@ import uuid
 from typing import Any
 
 import voluptuous as vol
-
 from homeassistant import config_entries
 from homeassistant.core import callback
-from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers import selector
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .api import HondaLinkAPI, HondaLinkAuthError, HondaLinkError
 from .const import (
@@ -135,13 +134,19 @@ class HondaLinkConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                         errors["base"] = "vin_required"
                     else:
                         api.vin = vin
-                        return await self._async_create_vehicle_entry(api, email, password, pin, vin, vehicle_info)
+                        return await self._async_create_vehicle_entry(
+                            api, email, password, pin, vin, vehicle_info
+                        )
 
         schema = vol.Schema(
             {
                 vol.Required(CONF_EMAIL): str,
-                vol.Required(CONF_PASSWORD): selector.TextSelector(selector.TextSelectorConfig(type=selector.TextSelectorType.PASSWORD)),
-                vol.Required(CONF_PIN): selector.TextSelector(selector.TextSelectorConfig(type=selector.TextSelectorType.PASSWORD)),
+                vol.Required(CONF_PASSWORD): selector.TextSelector(
+                    selector.TextSelectorConfig(type=selector.TextSelectorType.PASSWORD)
+                ),
+                vol.Required(CONF_PIN): selector.TextSelector(
+                    selector.TextSelectorConfig(type=selector.TextSelectorType.PASSWORD)
+                ),
                 vol.Optional(CONF_VIN, default=""): str,
                 vol.Optional(CONF_NAME, default=""): str,
             }
@@ -167,7 +172,9 @@ class HondaLinkConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             try:
                 await api.async_login()
                 vehicles = await api.async_get_vehicles()
-                if not any(v.get("VIN", "").upper() == entry.data[CONF_VIN].upper() for v in vehicles):
+                if not any(
+                    v.get("VIN", "").upper() == entry.data[CONF_VIN].upper() for v in vehicles
+                ):
                     errors["base"] = "vehicle_not_found"
             except HondaLinkAuthError:
                 errors["base"] = "invalid_auth"
@@ -175,17 +182,24 @@ class HondaLinkConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 errors["base"] = "cannot_connect"
             if not errors:
                 self.hass.config_entries.async_update_entry(
-                    entry, data={**entry.data, CONF_PASSWORD: user_input[CONF_PASSWORD], **api.export_auth_data()}
+                    entry,
+                    data={
+                        **entry.data,
+                        CONF_PASSWORD: user_input[CONF_PASSWORD],
+                        **api.export_auth_data(),
+                    },
                 )
                 await self.hass.config_entries.async_reload(entry.entry_id)
                 return self.async_abort(reason="reauth_successful")
         return self.async_show_form(
             step_id="reauth_confirm",
-            data_schema=vol.Schema({
-                vol.Required(CONF_PASSWORD): selector.TextSelector(
-                    selector.TextSelectorConfig(type=selector.TextSelectorType.PASSWORD)
-                ),
-            }),
+            data_schema=vol.Schema(
+                {
+                    vol.Required(CONF_PASSWORD): selector.TextSelector(
+                        selector.TextSelectorConfig(type=selector.TextSelectorType.PASSWORD)
+                    ),
+                }
+            ),
             errors=errors,
         )
 
@@ -208,7 +222,13 @@ class HondaLinkConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     data=data,
                 )
 
-        schema = vol.Schema({vol.Required(CONF_VIN): vol.In({vin: _vehicle_label(vehicle) for vin, vehicle in vehicles_by_vin.items()})})
+        schema = vol.Schema(
+            {
+                vol.Required(CONF_VIN): vol.In(
+                    {vin: _vehicle_label(vehicle) for vin, vehicle in vehicles_by_vin.items()}
+                )
+            }
+        )
         return self.async_show_form(step_id="vehicle", data_schema=schema, errors=errors)
 
     async def _async_create_vehicle_entry(
@@ -268,10 +288,22 @@ class HondaLinkOptionsFlowHandler(config_entries.OptionsFlow):
         data = self.config_entry.data
         schema = vol.Schema(
             {
-                vol.Required(CONF_PIN, default=options.get(CONF_PIN, data.get(CONF_PIN, ""))): selector.TextSelector(selector.TextSelectorConfig(type=selector.TextSelectorType.PASSWORD)),
-                vol.Required(CONF_SCAN_INTERVAL, default=options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL)): vol.All(vol.Coerce(int), vol.Range(min=1, max=1440)),
-                vol.Required(CONF_LOCK_COMMAND, default=options.get(CONF_LOCK_COMMAND, DEFAULT_LOCK_COMMAND)): vol.In([DEFAULT_LOCK_COMMAND, "lck"]),
-                vol.Required(CONF_UNLOCK_COMMAND, default=options.get(CONF_UNLOCK_COMMAND, DEFAULT_UNLOCK_COMMAND)): vol.In([DEFAULT_UNLOCK_COMMAND, "ulk"]),
+                vol.Required(
+                    CONF_PIN, default=options.get(CONF_PIN, data.get(CONF_PIN, ""))
+                ): selector.TextSelector(
+                    selector.TextSelectorConfig(type=selector.TextSelectorType.PASSWORD)
+                ),
+                vol.Required(
+                    CONF_SCAN_INTERVAL,
+                    default=options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL),
+                ): vol.All(vol.Coerce(int), vol.Range(min=1, max=1440)),
+                vol.Required(
+                    CONF_LOCK_COMMAND, default=options.get(CONF_LOCK_COMMAND, DEFAULT_LOCK_COMMAND)
+                ): vol.In([DEFAULT_LOCK_COMMAND, "lck"]),
+                vol.Required(
+                    CONF_UNLOCK_COMMAND,
+                    default=options.get(CONF_UNLOCK_COMMAND, DEFAULT_UNLOCK_COMMAND),
+                ): vol.In([DEFAULT_UNLOCK_COMMAND, "ulk"]),
             }
         )
         return self.async_show_form(step_id="init", data_schema=schema)

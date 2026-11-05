@@ -10,7 +10,9 @@ from .entity import HondaLinkEntity
 from .util import all_door_locks_locked, status_body
 
 
-async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback) -> None:
+async def async_setup_entry(
+    hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
+) -> None:
     coordinator = hass.data[DOMAIN][entry.entry_id][DATA_COORDINATOR]
     async_add_entities([HondaLinkDoorLock(coordinator, entry)])
 

@@ -1,11 +1,23 @@
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Any, Callable
+from typing import Any
 
-from homeassistant.components.sensor import SensorDeviceClass, SensorEntity, SensorEntityDescription, SensorStateClass
+from homeassistant.components.sensor import (
+    SensorDeviceClass,
+    SensorEntity,
+    SensorEntityDescription,
+    SensorStateClass,
+)
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import PERCENTAGE, UnitOfLength, UnitOfPressure, UnitOfSpeed, UnitOfTemperature
+from homeassistant.const import (
+    PERCENTAGE,
+    UnitOfLength,
+    UnitOfPressure,
+    UnitOfSpeed,
+    UnitOfTemperature,
+)
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
@@ -70,7 +82,9 @@ SENSORS: tuple[HondaLinkSensorDescription, ...] = (
         key="maintenance_items",
         translation_key="maintenance_items",
         icon="mdi:wrench-clock",
-        value_fn=lambda body: None if (messages := maintenance_messages(body)) is None else len(messages),
+        value_fn=lambda body: (
+            None if (messages := maintenance_messages(body)) is None else len(messages)
+        ),
         attr_fn=lambda body: {"messages": maintenance_messages(body) or []},
     ),
     HondaLinkSensorDescription(
@@ -145,7 +159,9 @@ SENSORS: tuple[HondaLinkSensorDescription, ...] = (
 )
 
 
-async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback) -> None:
+async def async_setup_entry(
+    hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
+) -> None:
     coordinator = hass.data[DOMAIN][entry.entry_id][DATA_COORDINATOR]
     async_add_entities(HondaLinkSensor(coordinator, entry, description) for description in SENSORS)
 
@@ -153,7 +169,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
 class HondaLinkSensor(HondaLinkEntity, SensorEntity):
     entity_description: HondaLinkSensorDescription
 
-    def __init__(self, coordinator, entry: ConfigEntry, description: HondaLinkSensorDescription) -> None:
+    def __init__(
+        self, coordinator, entry: ConfigEntry, description: HondaLinkSensorDescription
+    ) -> None:
         super().__init__(coordinator, entry, description.key)
         self.entity_description = description
 

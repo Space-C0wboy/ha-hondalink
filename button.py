@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Callable
 
 from homeassistant.components.button import ButtonEntity, ButtonEntityDescription
 from homeassistant.config_entries import ConfigEntry
@@ -58,7 +58,9 @@ BUTTONS: tuple[HondaLinkButtonDescription, ...] = (
 )
 
 
-async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback) -> None:
+async def async_setup_entry(
+    hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
+) -> None:
     coordinator = hass.data[DOMAIN][entry.entry_id][DATA_COORDINATOR]
     async_add_entities(HondaLinkButton(coordinator, entry, description) for description in BUTTONS)
 
@@ -66,7 +68,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
 class HondaLinkButton(HondaLinkEntity, ButtonEntity):
     entity_description: HondaLinkButtonDescription
 
-    def __init__(self, coordinator: HondaLinkDataUpdateCoordinator, entry: ConfigEntry, description: HondaLinkButtonDescription) -> None:
+    def __init__(
+        self,
+        coordinator: HondaLinkDataUpdateCoordinator,
+        entry: ConfigEntry,
+        description: HondaLinkButtonDescription,
+    ) -> None:
         super().__init__(coordinator, entry, description.key)
         self.entity_description = description
 

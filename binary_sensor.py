@@ -1,9 +1,14 @@
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Any, Callable
+from typing import Any
 
-from homeassistant.components.binary_sensor import BinarySensorDeviceClass, BinarySensorEntity, BinarySensorEntityDescription
+from homeassistant.components.binary_sensor import (
+    BinarySensorDeviceClass,
+    BinarySensorEntity,
+    BinarySensorEntityDescription,
+)
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -121,15 +126,21 @@ BINARY_SENSORS: tuple[HondaLinkBinarySensorDescription, ...] = (
 )
 
 
-async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback) -> None:
+async def async_setup_entry(
+    hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
+) -> None:
     coordinator = hass.data[DOMAIN][entry.entry_id][DATA_COORDINATOR]
-    async_add_entities(HondaLinkBinarySensor(coordinator, entry, description) for description in BINARY_SENSORS)
+    async_add_entities(
+        HondaLinkBinarySensor(coordinator, entry, description) for description in BINARY_SENSORS
+    )
 
 
 class HondaLinkBinarySensor(HondaLinkEntity, BinarySensorEntity):
     entity_description: HondaLinkBinarySensorDescription
 
-    def __init__(self, coordinator, entry: ConfigEntry, description: HondaLinkBinarySensorDescription) -> None:
+    def __init__(
+        self, coordinator, entry: ConfigEntry, description: HondaLinkBinarySensorDescription
+    ) -> None:
         super().__init__(coordinator, entry, description.key)
         self.entity_description = description
 

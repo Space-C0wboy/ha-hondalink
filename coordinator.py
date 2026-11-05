@@ -1,12 +1,12 @@
 from __future__ import annotations
 
-from datetime import timedelta
 import logging
+from datetime import timedelta
 from typing import Any
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
-from homeassistant.exceptions import HomeAssistantError, ConfigEntryAuthFailed
+from homeassistant.exceptions import ConfigEntryAuthFailed, HomeAssistantError
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from .api import HondaLinkAPI, HondaLinkAuthError, HondaLinkCommandError, HondaLinkError
@@ -21,7 +21,9 @@ class HondaLinkDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         self.api = api
         self.vin = entry.data[CONF_VIN]
         self.last_refresh_response: dict[str, Any] | None = None
-        interval = max(1, min(1440, int(entry.options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL))))
+        interval = max(
+            1, min(1440, int(entry.options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL)))
+        )
         super().__init__(
             hass,
             logging.getLogger(__name__),
@@ -34,7 +36,9 @@ class HondaLinkDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             data = await self.api.async_get_dashboard_latest(self.vin)
             auth_data = self.api.export_auth_data()
             if any(self.entry.data.get(k) != v for k, v in auth_data.items()):
-                self.hass.config_entries.async_update_entry(self.entry, data={**self.entry.data, **auth_data})
+                self.hass.config_entries.async_update_entry(
+                    self.entry, data={**self.entry.data, **auth_data}
+                )
             return data
         except HondaLinkAuthError as err:
             raise ConfigEntryAuthFailed(str(err)) from err
